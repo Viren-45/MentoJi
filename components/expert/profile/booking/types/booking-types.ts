@@ -3,9 +3,6 @@
 export interface BookingModalProps {
   expertId: string;
   expertName: string;
-  expertJobTitle: string;
-  expertCompany: string;
-  expertProfilePicture: string;
   isOpen: boolean;
   selectedDate: Date | null;
   selectedTimeSlot: string | null;

@@ -5,8 +5,8 @@ export interface Expert {
   first_name: string;
   last_name: string;
   username: string;
-  job_title: string | null;
-  company: string | null;
+  job_title: string;
+  company: string;
   location: string | null;
   bio: string | null;
   profile_picture_url: string;

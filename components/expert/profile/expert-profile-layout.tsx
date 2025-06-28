@@ -26,8 +26,8 @@ const ExpertProfileLayout: React.FC<ExpertProfileLayoutProps> = ({ expert }) => 
         profilePictureUrl={expert.profile_picture_url}
         firstName={expert.first_name}
         lastName={expert.last_name}
-        jobTitle={expert.job_title || 'Professional Consultant'}
-        company={expert.company || 'Independent'}
+        jobTitle={expert.job_title}
+        company={expert.company}
         location={expert.location}
         skills={expertSkills}
         isMentojiChoice={expert.mentoji_choice}
