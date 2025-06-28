@@ -1,38 +1,15 @@
 // hooks/booking/use-expert-availability.tsx
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { format, startOfDay, endOfDay, addDays, isSameDay } from 'date-fns';
-import supabase from '@/lib/supabase/supabase-client';
-
-export interface AvailabilityRule {
-  id: string;
-  day_of_week: number; // 0 = Sunday, 1 = Monday, etc.
-  start_time: string;
-  end_time: string;
-  timezone: string;
-  is_active: boolean;
-}
-
-export interface TimeBlock {
-  id: string;
-  start_datetime: string;
-  end_datetime: string;
-  block_type: 'vacation' | 'personal' | 'break' | 'buffer';
-  title?: string;
-}
-
-export interface ExistingConsultation {
-  id: string;
-  consultation_datetime: string;
-  duration_minutes: number;
-  status: string;
-}
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { startOfDay, endOfDay, addDays, isSameDay } from 'date-fns';
+import { useExpertSessionSettings } from './use-expert-session-settings';
+import { useAvailabilityRules } from './use-availability-rules';
+import { useTimeSlotCalculator } from './use-time-slot-calculator';
 
 export interface AvailableDate {
   date: Date;
   hasAvailability: boolean;
-  availableSlots?: string[];
 }
 
 interface UseExpertAvailabilityReturn {
@@ -40,153 +17,123 @@ interface UseExpertAvailabilityReturn {
   loading: boolean;
   error: string | null;
   refetch: () => Promise<void>;
-  getTimeSlotsForDate: (date: Date, duration: number) => Promise<string[]>;
+  getTimeSlotsForDate: (date: Date) => string[];
+  sessionSettings: any; // For backward compatibility
 }
 
 export const useExpertAvailability = (expertId: string | null): UseExpertAvailabilityReturn => {
   const [availableDates, setAvailableDates] = useState<AvailableDate[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchAvailabilityData = useCallback(async () => {
-    if (!expertId) {
+  // Use the separate hooks
+  const { sessionSettings, loading: settingsLoading, error: settingsError } = useExpertSessionSettings(expertId);
+  
+  const { startDate, endDate } = useMemo(() => {
+    const start = startOfDay(new Date());
+    const end = endOfDay(addDays(new Date(), sessionSettings?.max_booking_days_ahead || 60));
+    return { startDate: start, endDate: end };
+  }, [sessionSettings?.max_booking_days_ahead]);
+  
+  const { 
+    availabilityRules, 
+    timeBlocks, 
+    existingConsultations, 
+    loading: rulesLoading, 
+    error: rulesError 
+  } = useAvailabilityRules(expertId, startDate, endDate);
+
+  const { calculateTimeSlotsForDate } = useTimeSlotCalculator();
+
+  const loading = settingsLoading || rulesLoading;
+
+  // Calculate available dates
+  useEffect(() => {
+    if (!expertId || !sessionSettings || availabilityRules.length === 0) {
       setAvailableDates([]);
       return;
     }
 
     try {
-      setLoading(true);
       setError(null);
-
-      // Fetch availability rules
-      const { data: rules, error: rulesError } = await supabase
-        .from('expert_availability_rules')
-        .select('*')
-        .eq('expert_id', expertId)
-        .eq('is_active', true);
-
-      if (rulesError) throw rulesError;
-
-      // Fetch time blocks (blocked periods)
-      const startDate = startOfDay(new Date());
-      const endDate = endOfDay(addDays(new Date(), 60)); // Look ahead 60 days
-
-      const { data: timeBlocks, error: blocksError } = await supabase
-        .from('expert_time_blocks')
-        .select('*')
-        .eq('expert_id', expertId)
-        .gte('start_datetime', startDate.toISOString())
-        .lte('end_datetime', endDate.toISOString());
-
-      if (blocksError) throw blocksError;
-
-      // Fetch existing consultations
-      const { data: consultations, error: consultationsError } = await supabase
-        .from('consultations')
-        .select('consultation_datetime, duration_minutes, status')
-        .eq('expert_id', expertId)
-        .in('status', ['pending', 'confirmed', 'in_progress'])
-        .gte('consultation_datetime', startDate.toISOString())
-        .lte('consultation_datetime', endDate.toISOString());
-
-      if (consultationsError) throw consultationsError;
-
-      // Calculate available dates
-      const dates = calculateAvailableDates(
-        rules || [],
-        timeBlocks || [],
-        consultations || [],
-        startDate,
-        endDate
-      );
-
-      setAvailableDates(dates);
-    } catch (err) {
-      console.error('Error fetching availability:', err);
-      setError('Failed to load availability data');
-    } finally {
-      setLoading(false);
-    }
-  }, [expertId]);
-
-  const calculateAvailableDates = (
-    rules: AvailabilityRule[],
-    timeBlocks: TimeBlock[],
-    consultations: ExistingConsultation[],
-    startDate: Date,
-    endDate: Date
-  ): AvailableDate[] => {
-    const dates: AvailableDate[] = [];
-    const currentDate = new Date(startDate);
-
-    while (currentDate <= endDate) {
-      const dayOfWeek = currentDate.getDay();
       
-      // Check if expert has availability rules for this day
-      const dayRules = rules.filter(rule => rule.day_of_week === dayOfWeek);
+      const advanceBookingHours = sessionSettings.advance_booking_hours || 48;
+      const earliestBookingDate = addDays(new Date(), Math.ceil(advanceBookingHours / 24));
       
-      if (dayRules.length === 0) {
-        // No availability rules for this day
-        dates.push({
-          date: new Date(currentDate),
-          hasAvailability: false,
-        });
-      } else {
-        // Check if day is blocked by time blocks
-        const isBlocked = timeBlocks.some(block => {
-          const blockStart = new Date(block.start_datetime);
-          const blockEnd = new Date(block.end_datetime);
-          return currentDate >= startOfDay(blockStart) && currentDate <= endOfDay(blockEnd);
-        });
+      const dates: AvailableDate[] = [];
+      const currentDate = new Date(startDate);
 
-        if (isBlocked) {
+      while (currentDate <= endDate) {
+        const dayOfWeek = currentDate.getDay();
+        
+        // Skip dates within advance booking period
+        if (currentDate < earliestBookingDate) {
+          dates.push({
+            date: new Date(currentDate),
+            hasAvailability: false,
+          });
+          currentDate.setDate(currentDate.getDate() + 1);
+          continue;
+        }
+        
+        // Check if expert has availability rules for this day
+        const dayRules = availabilityRules.filter(rule => rule.day_of_week === dayOfWeek);
+        
+        if (dayRules.length === 0) {
           dates.push({
             date: new Date(currentDate),
             hasAvailability: false,
           });
         } else {
-          // Day has potential availability
-          // For now, just mark as available - detailed slot calculation happens in getTimeSlotsForDate
+          // Check if day is blocked by time blocks
+          const isBlocked = timeBlocks.some(block => {
+            const blockStart = new Date(block.start_datetime);
+            const blockEnd = new Date(block.end_datetime);
+            return currentDate >= startOfDay(blockStart) && currentDate <= endOfDay(blockEnd);
+          });
+
           dates.push({
             date: new Date(currentDate),
-            hasAvailability: true,
+            hasAvailability: !isBlocked,
           });
         }
+
+        currentDate.setDate(currentDate.getDate() + 1);
       }
 
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
-
-    return dates;
-  };
-
-  const getTimeSlotsForDate = useCallback(async (date: Date, duration: number): Promise<string[]> => {
-    if (!expertId) return [];
-
-    try {
-      // This is a simplified version - you'll need to implement detailed slot calculation
-      // based on availability rules, existing bookings, and duration
-      
-      // For now, return mock time slots
-      const mockSlots = [
-        '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-        '14:00', '14:30', '15:00', '15:30', '16:00', '16:30'
-      ];
-
-      return mockSlots;
+      setAvailableDates(dates);
     } catch (err) {
-      console.error('Error calculating time slots:', err);
+      console.error('Error calculating available dates:', err);
+      setError('Failed to calculate availability');
+      setAvailableDates([]);
+    }
+  }, [expertId, sessionSettings, availabilityRules, timeBlocks, startDate, endDate]);
+
+  // Get time slots for a specific date
+  const getTimeSlotsForDate = useCallback((date: Date): string[] => {
+    if (!sessionSettings || availabilityRules.length === 0) {
       return [];
     }
-  }, [expertId]);
+
+    return calculateTimeSlotsForDate(
+      date,
+      availabilityRules,
+      sessionSettings,
+      timeBlocks,
+      existingConsultations
+    );
+  }, [sessionSettings, availabilityRules, timeBlocks, existingConsultations, calculateTimeSlotsForDate]);
 
   const refetch = useCallback(async () => {
-    await fetchAvailabilityData();
-  }, [fetchAvailabilityData]);
+    // This will trigger re-fetching through the dependency hooks
+    setError(null);
+  }, []);
 
+  // Combine errors from all hooks
   useEffect(() => {
-    fetchAvailabilityData();
-  }, [fetchAvailabilityData]);
+    if (settingsError || rulesError) {
+      setError(settingsError || rulesError);
+    }
+  }, [settingsError, rulesError]);
 
   return {
     availableDates,
@@ -194,5 +141,6 @@ export const useExpertAvailability = (expertId: string | null): UseExpertAvailab
     error,
     refetch,
     getTimeSlotsForDate,
+    sessionSettings, // For backward compatibility
   };
 };

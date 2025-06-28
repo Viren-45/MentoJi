@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Heart, Home, Linkedin, Twitter, MapPin, Star, ChevronDown, X, ArrowLeft } from 'lucide-react';
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
 import BookingModal from "./booking/booking-modal";
 
 interface ExpertHeaderProps {
@@ -261,21 +261,20 @@ const ExpertHeader: React.FC<ExpertHeaderProps> = ({
                         </Button>
                       </DialogTrigger>
                       <DialogContent className="sm:max-w-md p-0" onInteractOutside={(e) => e.preventDefault()}>
+                        <DialogTitle className="sr-only">
+                          Book a session with {firstName} {lastName}
+                        </DialogTitle>
                         <BookingModal 
                           expertId={expertId}
                           expertName={`${firstName} ${lastName}`}
                           expertJobTitle={jobTitle}
                           expertCompany={company}
                           expertProfilePicture={profilePictureUrl}
-                          isOpen={isBookingOpen}
-                          currentStep={bookingStep}
+                          isOpen={isBookingOpen} 
                           selectedDate={selectedDate}
                           selectedTimeSlot={selectedTimeSlot}
                           selectedDuration={selectedDuration}
                           closeModal={closeBookingModal}
-                          goToNextStep={goToNextStep}
-                          goToPreviousStep={goToPreviousStep}
-                          goToStep={goToStep}
                           selectDate={selectDate}
                           selectTimeSlot={selectTimeSlot}
                           selectDuration={selectDuration}

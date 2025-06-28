@@ -1,111 +1,152 @@
 // components/expert/profile/booking/booking-calendar.tsx
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isSameDay, addMonths, subMonths, isToday, isBefore } from 'date-fns';
+import { 
+  format, 
+  startOfMonth, 
+  endOfMonth, 
+  startOfWeek, 
+  endOfWeek, 
+  addDays, 
+  isSameMonth, 
+  isSameDay, 
+  addMonths, 
+  subMonths, 
+  isToday, 
+  isBefore 
+} from 'date-fns';
 import { useExpertAvailability } from '@/hooks/booking/use-expert-availability';
+import TimeSlotGrid from './time-slot-grid';
+import { BookingCalendarProps } from './types/booking-types';
 
-interface BookingCalendarProps {
-  expertId: string;
-  selectedDate: Date | null;
-  selectDate: (date: Date) => void;
-}
-
-const BookingCalendar: React.FC<BookingCalendarProps> = ({ 
+const BookingCalendar: React.FC<BookingCalendarProps> = ({
   expertId,
   selectedDate,
-  selectDate
+  selectedTimeSlot,
+  onSelectDate,
+  onSelectTimeSlot,
 }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const { availableDates, loading } = useExpertAvailability(expertId);
+  const [timeSlots, setTimeSlots] = useState<string[]>([]);
+  const [loadingTimeSlots, setLoadingTimeSlots] = useState(false);
+  
+  const { availableDates, getTimeSlotsForDate, loading } = useExpertAvailability(expertId);
+
+  // Load time slots when date is selected
+  useEffect(() => {
+    if (!selectedDate) {
+      setTimeSlots([]);
+      return;
+    }
+
+    const loadTimeSlots = async () => {
+      console.log('🔄 Loading time slots for:', selectedDate);
+      setLoadingTimeSlots(true);
+      try {
+        const slots = getTimeSlotsForDate(selectedDate);
+        console.log('✅ Time slots received:', slots);
+        setTimeSlots(slots);
+      } catch (error) {
+        console.error('Error loading time slots:', error);
+        setTimeSlots([]);
+      } finally {
+        setLoadingTimeSlots(false);
+      }
+    };
+
+    loadTimeSlots();
+  }, [selectedDate, getTimeSlotsForDate]);
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(monthStart);
   const startDate = startOfWeek(monthStart);
   const endDate = endOfWeek(monthEnd);
 
-  const dateFormat = "d";
-  const rows = [];
-
-  let days = [];
-  let day = startDate;
-  let formattedDate = "";
-
-  // Helper function to check if date is available
+  // Helper functions
   const isDateAvailable = (date: Date) => {
     const availableDate = availableDates.find(ad => isSameDay(ad.date, date));
     return availableDate?.hasAvailability || false;
   };
 
-  // Helper function to check if date is selectable
   const isDateSelectable = (date: Date) => {
     return !isBefore(date, new Date()) && isSameMonth(date, monthStart) && isDateAvailable(date);
   };
 
-  // Generate calendar days
-  while (day <= endDate) {
-    for (let i = 0; i < 7; i++) {
-      formattedDate = format(day, dateFormat);
-      const cloneDay = new Date(day);
-      const isCurrentMonth = isSameMonth(day, monthStart);
-      const isSelected = selectedDate && isSameDay(day, selectedDate);
-      const isAvailable = isDateAvailable(day);
-      const isSelectable = isDateSelectable(day);
-      const isPast = isBefore(day, new Date());
-      const todayDate = isToday(day);
+  // Generate calendar grid
+  const generateCalendarDays = () => {
+    const rows = [];
+    let days = [];
+    let day = startDate;
 
-      days.push(
-        <div
-          key={day.toString()}
-          className={`
-            relative h-12 w-12 flex items-center justify-center cursor-pointer text-sm font-medium transition-all
-            ${!isCurrentMonth 
-              ? 'text-gray-300 cursor-not-allowed' 
-              : isPast 
-                ? 'text-gray-400 cursor-not-allowed'
-                : isSelectable
-                  ? 'text-gray-900 hover:bg-blue-50'
-                  : 'text-gray-400 cursor-not-allowed'
-            }
-            ${isSelected 
-              ? 'bg-blue-600 text-white' 
-              : todayDate && isCurrentMonth
-                ? 'bg-blue-100 text-blue-600'
-                : ''
-            }
-            ${isSelected ? 'rounded-full' : 'rounded-lg'}
-          `}
-          onClick={() => {
-            if (isSelectable) {
-              selectDate(cloneDay);
-            }
-          }}
-        >
-          <span className="relative z-10">
-            {formattedDate}
-          </span>
-          
-          {/* Blue circle for available dates */}
-          {isAvailable && !isSelected && !isPast && isCurrentMonth && (
-            <div className="absolute inset-0 rounded-full border-2 border-blue-500"></div>
-          )}
-          
-          {/* Today indicator */}
-          {todayDate && !isSelected && isCurrentMonth && (
-            <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-blue-600 rounded-full"></div>
-          )}
+    while (day <= endDate) {
+      for (let i = 0; i < 7; i++) {
+        const formattedDate = format(day, 'd');
+        const cloneDay = new Date(day);
+        const isCurrentMonth = isSameMonth(day, monthStart);
+        const isSelected = selectedDate && isSameDay(day, selectedDate);
+        const isAvailable = isDateAvailable(day);
+        const isSelectable = isDateSelectable(day);
+        const isPast = isBefore(day, new Date());
+        const todayDate = isToday(day);
+
+        days.push(
+          <div
+            key={day.toString()}
+            className={`
+              relative h-12 w-12 flex items-center justify-center cursor-pointer text-sm font-medium transition-all
+              ${!isCurrentMonth 
+                ? 'text-gray-300 cursor-not-allowed' 
+                : isPast 
+                  ? 'text-gray-400 cursor-not-allowed'
+                  : isSelectable
+                    ? 'text-gray-900 hover:bg-blue-50'
+                    : 'text-gray-400 cursor-not-allowed'
+              }
+              ${isSelected 
+                ? 'bg-blue-600 text-white' 
+                : todayDate && isCurrentMonth
+                  ? 'bg-blue-100 text-blue-600'
+                  : ''
+              }
+              ${isSelected ? 'rounded-full' : 'rounded-lg'}
+            `}
+            onClick={() => {
+              if (isSelectable) {
+                onSelectDate(cloneDay);
+                // Reset time slot when date changes
+                onSelectTimeSlot('');
+              }
+            }}
+          >
+            <span className="relative z-10">
+              {formattedDate}
+            </span>
+            
+            {/* Blue circle for available dates */}
+            {isAvailable && !isSelected && !isPast && isCurrentMonth && (
+              <div className="absolute inset-0 rounded-full border-2 border-blue-500"></div>
+            )}
+            
+            {/* Today indicator */}
+            {todayDate && !isSelected && isCurrentMonth && (
+              <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-blue-600 rounded-full"></div>
+            )}
+          </div>
+        );
+        day = addDays(day, 1);
+      }
+      
+      rows.push(
+        <div className="grid grid-cols-7 gap-1" key={day.toString()}>
+          {days}
         </div>
       );
-      day = addDays(day, 1);
+      days = [];
     }
-    rows.push(
-      <div className="grid grid-cols-7 gap-1" key={day.toString()}>
-        {days}
-      </div>
-    );
-    days = [];
-  }
+    return rows;
+  };
 
   const nextMonth = () => {
     setCurrentMonth(addMonths(currentMonth, 1));
@@ -175,23 +216,20 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
       </div>
 
       {/* Calendar Grid */}
-      <div className="space-y-1">
-        {rows}
+      <div className="space-y-1 mb-6">
+        {generateCalendarDays()}
       </div>
 
-      {/* Legend */}
-      <div className="mt-6 pt-4 border-t border-gray-200">
-        <div className="flex items-center gap-4 text-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full border-2 border-blue-500"></div>
-            <span className="text-gray-600">Available</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full bg-blue-600"></div>
-            <span className="text-gray-600">Selected</span>
-          </div>
-        </div>
-      </div>
+      {/* Time Slots Section */}
+      {selectedDate && (
+        <TimeSlotGrid
+          selectedDate={selectedDate}
+          selectedTimeSlot={selectedTimeSlot}
+          timeSlots={timeSlots}
+          loading={loadingTimeSlots}
+          onSelectTimeSlot={onSelectTimeSlot}
+        />
+      )}
     </div>
   );
 };
