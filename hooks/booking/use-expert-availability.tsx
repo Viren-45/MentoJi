@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { startOfDay, endOfDay, addDays, isSameDay } from 'date-fns';
+import { startOfDay, endOfDay, addDays } from 'date-fns';
 import { useExpertSessionSettings } from './use-expert-session-settings';
 import { useAvailabilityRules } from './use-availability-rules';
 import { useTimeSlotCalculator } from './use-time-slot-calculator';
@@ -18,7 +18,7 @@ interface UseExpertAvailabilityReturn {
   error: string | null;
   refetch: () => Promise<void>;
   getTimeSlotsForDate: (date: Date) => string[];
-  sessionSettings: any; // For backward compatibility
+  sessionSettings: any;
 }
 
 export const useExpertAvailability = (expertId: string | null): UseExpertAvailabilityReturn => {
@@ -30,7 +30,7 @@ export const useExpertAvailability = (expertId: string | null): UseExpertAvailab
   
   const { startDate, endDate } = useMemo(() => {
     const start = startOfDay(new Date());
-    const end = endOfDay(addDays(new Date(), sessionSettings?.max_booking_days_ahead || 60));
+    const end = endOfDay(addDays(new Date(), sessionSettings?.max_booking_days_ahead || 30));
     return { startDate: start, endDate: end };
   }, [sessionSettings?.max_booking_days_ahead]);
   
@@ -56,7 +56,7 @@ export const useExpertAvailability = (expertId: string | null): UseExpertAvailab
     try {
       setError(null);
       
-      const advanceBookingHours = sessionSettings.advance_booking_hours || 48;
+      const advanceBookingHours = sessionSettings.advance_booking_hours || 24;
       const earliestBookingDate = addDays(new Date(), Math.ceil(advanceBookingHours / 24));
       
       const dates: AvailableDate[] = [];
@@ -84,7 +84,7 @@ export const useExpertAvailability = (expertId: string | null): UseExpertAvailab
             hasAvailability: false,
           });
         } else {
-          // Check if day is blocked by time blocks
+          // Check if day is blocked
           const isBlocked = timeBlocks.some(block => {
             const blockStart = new Date(block.start_datetime);
             const blockEnd = new Date(block.end_datetime);
@@ -124,7 +124,6 @@ export const useExpertAvailability = (expertId: string | null): UseExpertAvailab
   }, [sessionSettings, availabilityRules, timeBlocks, existingConsultations, calculateTimeSlotsForDate]);
 
   const refetch = useCallback(async () => {
-    // This will trigger re-fetching through the dependency hooks
     setError(null);
   }, []);
 
@@ -141,6 +140,6 @@ export const useExpertAvailability = (expertId: string | null): UseExpertAvailab
     error,
     refetch,
     getTimeSlotsForDate,
-    sessionSettings, // For backward compatibility
+    sessionSettings,
   };
 };

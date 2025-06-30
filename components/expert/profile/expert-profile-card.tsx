@@ -28,9 +28,6 @@ export const ExpertProfileCard: React.FC<ExpertProfileCardProps> = ({
   skills = [],
 }) => {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
-  const [selectedDuration, setSelectedDuration] = useState<number>(30);
 
   const openBookingModal = () => {
     setIsBookingOpen(true);
@@ -38,21 +35,6 @@ export const ExpertProfileCard: React.FC<ExpertProfileCardProps> = ({
 
   const closeBookingModal = () => {
     setIsBookingOpen(false);
-    setSelectedDate(null);
-    setSelectedTimeSlot(null);
-    setSelectedDuration(30);
-  };
-
-  const selectDate = (date: Date) => {
-    setSelectedDate(date);
-  };
-
-  const selectTimeSlot = (timeSlot: string) => {
-    setSelectedTimeSlot(timeSlot);
-  };
-
-  const selectDuration = (duration: number) => {
-    setSelectedDuration(duration);
   };
 
   const handleSave = () => {
@@ -147,7 +129,7 @@ export const ExpertProfileCard: React.FC<ExpertProfileCardProps> = ({
                         Book Session
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-md p-0" onInteractOutside={(e) => e.preventDefault()}>
+                    <DialogContent className="sm:max-w-6xl p-0" onInteractOutside={(e) => e.preventDefault()}> {/* Increased to max-w-6xl for editor */}
                       <DialogTitle className="sr-only">
                         Book a session with {firstName} {lastName}
                       </DialogTitle>
@@ -155,13 +137,8 @@ export const ExpertProfileCard: React.FC<ExpertProfileCardProps> = ({
                         expertId={expertId}
                         expertName={`${firstName} ${lastName}`}
                         isOpen={isBookingOpen} 
-                        selectedDate={selectedDate}
-                        selectedTimeSlot={selectedTimeSlot}
-                        selectedDuration={selectedDuration}
                         closeModal={closeBookingModal}
-                        selectDate={selectDate}
-                        selectTimeSlot={selectTimeSlot}
-                        selectDuration={selectDuration}
+                        // Removed all the date/time slot props since Nylas handles this
                       />
                     </DialogContent>
                   </Dialog>

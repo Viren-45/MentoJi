@@ -70,10 +70,11 @@ export const useAvailabilityRules = (
         .eq('is_active', true);
 
       if (rulesError) throw rulesError;
+      setAvailabilityRules(rules || []);
 
-      // Fetch time blocks (blocked periods) if date range provided
-      let timeBlocksData: TimeBlock[] = [];
+      // Fetch time blocks and consultations only if date range provided
       if (startDate && endDate) {
+        // Fetch time blocks
         const { data: blocks, error: blocksError } = await supabase
           .from('expert_time_blocks')
           .select('*')
@@ -82,12 +83,9 @@ export const useAvailabilityRules = (
           .lte('end_datetime', endDate.toISOString());
 
         if (blocksError) throw blocksError;
-        timeBlocksData = blocks || [];
-      }
+        setTimeBlocks(blocks || []);
 
-      // Fetch existing consultations if date range provided
-      let consultationsData: ExistingConsultation[] = [];
-      if (startDate && endDate) {
+        // Fetch existing consultations
         const { data: consultations, error: consultationsError } = await supabase
           .from('consultations')
           .select('id, consultation_datetime, duration_minutes, status')
@@ -97,18 +95,9 @@ export const useAvailabilityRules = (
           .lte('consultation_datetime', endDate.toISOString());
 
         if (consultationsError) throw consultationsError;
-        
-        consultationsData = consultations?.map(c => ({
-          id: c.id,
-          consultation_datetime: c.consultation_datetime,
-          duration_minutes: c.duration_minutes,
-          status: c.status
-        })) || [];
+        setExistingConsultations(consultations || []);
       }
 
-      setAvailabilityRules(rules || []);
-      setTimeBlocks(timeBlocksData);
-      setExistingConsultations(consultationsData);
     } catch (err) {
       console.error('Error fetching availability rules:', err);
       setError('Failed to load availability data');

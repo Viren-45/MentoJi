@@ -97,13 +97,7 @@ export const ExpertActionButtons: React.FC<ExpertActionButtonsProps> = ({
             expertId={expertId}
             expertName={expertName}
             isOpen={isBookingOpen} 
-            selectedDate={selectedDate}
-            selectedTimeSlot={selectedTimeSlot}
-            selectedDuration={selectedDuration}
             closeModal={closeBookingModal}
-            selectDate={selectDate}
-            selectTimeSlot={selectTimeSlot}
-            selectDuration={selectDuration}
           />
         </DialogContent>
       </Dialog>

@@ -51,16 +51,16 @@ export const useExpertSessionSettings = (expertId: string | null): UseExpertSess
         throw settingsError;
       }
 
-      // Set default values if no settings exist
+      // Default settings if none exist
       const defaultSettings: ExpertSessionSettings = {
         id: '',
         expert_id: expertId,
         session_duration_minutes: 30,
-        session_price: 50,
+        session_price: 75,
         buffer_before_minutes: 15,
         buffer_after_minutes: 15,
-        advance_booking_hours: 48,
-        max_booking_days_ahead: 60,
+        advance_booking_hours: 24,
+        max_booking_days_ahead: 30,
         auto_confirm_bookings: true,
         send_booking_reminders: true,
         use_waiting_room: true,
