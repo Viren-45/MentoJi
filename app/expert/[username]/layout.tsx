@@ -1,6 +1,7 @@
 // app/expert/[username]/layout.tsx
 import { Metadata } from 'next';
 import supabase from '@/lib/supabase/supabase-client';
+import Navbar from '@/components/home/navigation/navbar';
 
 interface ExpertLayoutProps {
   children: React.ReactNode;
@@ -48,5 +49,15 @@ export async function generateMetadata({ params }: ExpertLayoutProps): Promise<M
 }
 
 export default function ExpertLayout({ children }: ExpertLayoutProps) {
-  return <>{children}</>;
+  return (
+    <div className="min-h-screen mb-20">
+      {/* Browse Experts Navbar */}
+      <Navbar />
+      
+      {/* Main Content */}
+      <main>
+        {children}
+      </main>
+    </div>
+  );
 }

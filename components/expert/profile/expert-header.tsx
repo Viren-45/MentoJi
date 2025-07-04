@@ -9,6 +9,7 @@ import { ExpertProfilePicture } from './expert-profile-picture';
 
 interface ExpertHeaderProps {
   expertId: string;
+  username: string;
   profilePictureUrl: string;
   firstName: string;
   lastName: string;
@@ -23,6 +24,7 @@ interface ExpertHeaderProps {
 
 const ExpertHeader: React.FC<ExpertHeaderProps> = ({
   expertId,
+  username,
   profilePictureUrl,
   firstName,
   lastName,
@@ -68,6 +70,7 @@ const ExpertHeader: React.FC<ExpertHeaderProps> = ({
 
         {/* Expert Profile Card */}
         <ExpertProfileCard
+          username={username}
           expertId={expertId}
           firstName={firstName}
           lastName={lastName}

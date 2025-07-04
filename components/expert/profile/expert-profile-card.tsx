@@ -4,14 +4,15 @@
 import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
-import { Heart, MapPin, Star, ChevronDown } from 'lucide-react';
-import BookingModal from "./booking/booking-modal";
+import { Heart, MapPin, Star, ChevronDown, X } from 'lucide-react';
+import { useAuth } from '@/hooks/auth/use-auth';
+import { useRouter } from 'next/navigation';
 
 interface ExpertProfileCardProps {
   expertId: string;
   firstName: string;
   lastName: string;
+  username: string;
   jobTitle: string;
   company: string;
   location?: string | null;
@@ -22,12 +23,16 @@ export const ExpertProfileCard: React.FC<ExpertProfileCardProps> = ({
   expertId,
   firstName,
   lastName,
+  username,
   jobTitle,
   company,
   location,
   skills = [],
 }) => {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const { user, signOut, isAuthenticated, isClient, isExpert } = useAuth();
+  const router = useRouter();
 
   const openBookingModal = () => {
     setIsBookingOpen(true);
@@ -37,13 +42,42 @@ export const ExpertProfileCard: React.FC<ExpertProfileCardProps> = ({
     setIsBookingOpen(false);
   };
 
+  const openAuthModal = () => {
+    setIsAuthModalOpen(true);
+  };
+
+  const closeAuthModal = () => {
+    setIsAuthModalOpen(false);
+  };
+
   const handleSave = () => {
     console.log('Save expert clicked');
   };
 
   const handleBookSession = () => {
     console.log('Book Session clicked for expert:', expertId);
-    openBookingModal();
+  
+    // Check authentication and user type
+    if (!isAuthenticated) {
+      // Not logged in - show auth modal
+      openAuthModal();
+      return;
+    }
+  
+    if (isExpert) {
+      // Expert trying to book - show auth modal with expert message
+      openAuthModal();
+      return;
+    }
+  
+    if (isClient) {
+      // Client logged in - redirect to booking page
+      router.push(`/booking/${username}`);
+      return;
+    }
+  
+    // Fallback - show auth modal
+    openAuthModal();
   };
 
   const scrollToSkills = () => {
@@ -115,33 +149,13 @@ export const ExpertProfileCard: React.FC<ExpertProfileCardProps> = ({
                     Save
                   </Button>
                   
-                  <Dialog open={isBookingOpen} onOpenChange={(open) => {
-                    if (open) {
-                      openBookingModal();
-                    } else {
-                      closeBookingModal();
-                    }
-                  }}>
-                    <DialogTrigger asChild>
-                      <Button 
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 font-medium text-base"
-                      >
-                        Book Session
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-6xl p-0" onInteractOutside={(e) => e.preventDefault()}> {/* Increased to max-w-6xl for editor */}
-                      <DialogTitle className="sr-only">
-                        Book a session with {firstName} {lastName}
-                      </DialogTitle>
-                      <BookingModal 
-                        expertId={expertId}
-                        expertName={`${firstName} ${lastName}`}
-                        isOpen={isBookingOpen} 
-                        closeModal={closeBookingModal}
-                        // Removed all the date/time slot props since Nylas handles this
-                      />
-                    </DialogContent>
-                  </Dialog>
+                  {/* Direct button - no Dialog wrapper */}
+                  <Button 
+                    onClick={handleBookSession}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 font-medium text-base"
+                  >
+                    Book Session
+                  </Button>
                 </div>
               </div>
             </div>
@@ -187,6 +201,115 @@ export const ExpertProfileCard: React.FC<ExpertProfileCardProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Auth Modal */}
+      {isAuthModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md flex flex-col overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">
+                  {!isAuthenticated ? 'Sign in to book' : 'Account Required'}
+                </h2>
+                <p className="text-sm text-gray-600 mt-1">
+                  {!isAuthenticated 
+                    ? 'Please sign in or create an account to book a session'
+                    : isExpert 
+                      ? 'You need a client account to book sessions'
+                      : 'Client account required'
+                  }
+                </p>
+              </div>
+              
+              <button
+                onClick={closeAuthModal}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-600" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-6">
+              {!isAuthenticated ? (
+                // Not logged in - show login/signup options
+                <div className="space-y-4">
+                  <p className="text-gray-700 leading-relaxed">
+                    To book a session with <strong>{firstName} {lastName}</strong>, 
+                    you'll need to sign in or create a client account.
+                  </p>
+                  
+                  <div className="space-y-3">
+                    <button
+                      onClick={() => {
+                        // Navigate to login page
+                        window.location.href = '/auth/sign-in?redirect=' + encodeURIComponent(window.location.pathname);
+                      }}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-semibold transition-colors"
+                    >
+                      Sign In
+                    </button>
+                    
+                    <button
+                      onClick={() => {
+                        // Navigate to signup page
+                        window.location.href = '/auth/sign-up?redirect=' + encodeURIComponent(window.location.pathname);
+                      }}
+                      className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 px-4 rounded-lg font-semibold transition-colors"
+                    >
+                      Create Account
+                    </button>
+                  </div>
+                </div>
+              ) : isExpert ? (
+                // Expert logged in - show switch account message
+                <div className="space-y-4">
+                  <p className="text-gray-700 leading-relaxed">
+                    You're currently logged in as an expert. To book a session, 
+                    you need to log out and sign in with a client account.
+                  </p>
+                  
+                  <div className="space-y-3">
+                    <button
+                      onClick={async () => {
+                        // Sign out current expert account
+                        await signOut();
+                        // Redirect to login
+                        window.location.href = '/auth/sign-in?redirect=' + encodeURIComponent(window.location.pathname);
+                      }}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-semibold transition-colors"
+                    >
+                      Sign Out & Sign In as Client
+                    </button>
+                    
+                    <button
+                      onClick={closeAuthModal}
+                      className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 px-4 rounded-lg font-semibold transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                // Fallback - shouldn't happen but handle gracefully
+                <div className="space-y-4">
+                  <p className="text-gray-700 leading-relaxed">
+                    Please sign in with a client account to book sessions.
+                  </p>
+                  
+                  <button
+                    onClick={closeAuthModal}
+                    className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 px-4 rounded-lg font-semibold transition-colors"
+                  >
+                    Close
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

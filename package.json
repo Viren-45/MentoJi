@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@100mslive/server-sdk": "^0.3.0",
     "@nylas/react": "^1.3.5",
     "@nylas/web-elements": "^2.0.2",
     "@radix-ui/react-avatar": "^1.1.10",
@@ -20,6 +21,8 @@
     "@radix-ui/react-slider": "^1.3.5",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-switch": "^1.2.5",
+    "@stripe/react-stripe-js": "^3.7.0",
+    "@stripe/stripe-js": "^7.4.0",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.50.0",
     "class-variance-authority": "^0.7.1",
@@ -35,7 +38,9 @@
     "react-dom": "^19.0.0",
     "react-dropzone": "^14.3.8",
     "react-easy-crop": "^5.4.2",
+    "resend": "^4.6.0",
     "sonner": "^2.0.5",
+    "stripe": "^18.2.1",
     "tailwind-merge": "^3.3.0",
     "zod": "^3.25.56"
   },

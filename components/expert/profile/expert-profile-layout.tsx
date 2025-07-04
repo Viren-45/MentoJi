@@ -23,6 +23,7 @@ const ExpertProfileLayout: React.FC<ExpertProfileLayoutProps> = ({ expert }) => 
       {/* Expert Header - Contains blue background, profile, and info */}
       <ExpertHeader
         expertId={expert.id}
+        username={expert.username}
         profilePictureUrl={expert.profile_picture_url}
         firstName={expert.first_name}
         lastName={expert.last_name}
