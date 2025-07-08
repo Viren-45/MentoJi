@@ -3,6 +3,7 @@
 
 import Stripe from "stripe";
 import supabase from "@/lib/supabase/supabase-client";
+import supabaseServer from "@/lib/supabase/supabase-server";
 
 // Initialize Stripe with secret key
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -38,9 +39,7 @@ export interface PaymentRecord {
  * Creates a Stripe Payment Intent for the consultation
  * This is called when user clicks "Pay" button
  */
-export async function createPaymentIntent(
-  data: PaymentData
-): Promise<{
+export async function createPaymentIntent(data: PaymentData): Promise<{
   success: boolean;
   clientSecret?: string;
   paymentIntentId?: string;
@@ -117,8 +116,8 @@ export async function confirmPaymentAndStoreRecord(
     // Calculate Stripe processing fee (2.9% + $0.30)
     const stripeFee = Math.round((amountCharged * 0.029 + 0.3) * 100) / 100;
 
-    // Get session price to calculate platform fee
-    const { data: consultation } = await supabase
+    // Get session price to calculate platform fee (using service role)
+    const { data: consultation } = await supabaseServer
       .from("consultations")
       .select("price_amount")
       .eq("id", consultationId)
@@ -132,7 +131,7 @@ export async function confirmPaymentAndStoreRecord(
     const platformFee = Math.round(sessionPrice * 0.1 * 100) / 100; // 10%
     const expertPayout = sessionPrice - stripeFee; // Expert gets session price minus Stripe fee
 
-    // Store payment record
+    // Store payment record (using service role)
     const paymentData = {
       consultation_id: consultationId,
       stripe_payment_intent_id: paymentIntentId,
@@ -148,7 +147,7 @@ export async function confirmPaymentAndStoreRecord(
       customer_name: customerName,
     };
 
-    const { data: paymentRecord, error: insertError } = await supabase
+    const { data: paymentRecord, error: insertError } = await supabaseServer
       .from("consultation_payments")
       .insert(paymentData)
       .select()

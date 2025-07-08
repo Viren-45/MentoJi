@@ -2,6 +2,7 @@
 "use server";
 
 import supabase from "@/lib/supabase/supabase-client";
+import supabaseServer from "@/lib/supabase/supabase-server";
 import { QuestionnaireAnswers } from "@/components/booking/step-two/questionnaire";
 
 export interface CreateConsultationData {
@@ -89,7 +90,7 @@ export async function createPendingConsultation(
     };
 
     // Insert consultation
-    const { data: consultation, error: insertError } = await supabase
+    const { data: consultation, error: insertError } = await supabaseServer
       .from("consultations")
       .insert(consultationData)
       .select()
@@ -126,7 +127,7 @@ export async function confirmConsultation(
       updated_at: new Date().toISOString(),
     };
 
-    const { data: consultation, error: updateError } = await supabase
+    const { data: consultation, error: updateError } = await supabaseServer
       .from("consultations")
       .update(updateData)
       .eq("id", consultationId)
@@ -237,9 +238,7 @@ export async function cancelConsultation(
 /**
  * Gets client data for pre-filling payment form
  */
-export async function getClientData(
-  clientId: string
-): Promise<{
+export async function getClientData(clientId: string): Promise<{
   success: boolean;
   data?: { email: string; fullName: string };
   error?: string;
