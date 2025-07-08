@@ -2,17 +2,19 @@
 "use client";
 
 import { notFound } from 'next/navigation';
+import { use } from 'react';
 import { useExpertProfile } from '@/hooks/expert-profile/use-expert-profile';
 import ExpertProfileLayout from '@/components/expert/profile/expert-profile-layout';
 
 interface ExpertProfilePageProps {
-  params: {
+  params: Promise<{
     username: string;
-  };
+  }>;
 }
 
 export default function ExpertProfilePage({ params }: ExpertProfilePageProps) {
-  const { username } = params;
+  // Use React's 'use' hook to unwrap the Promise in client components
+  const { username } = use(params);
   const { expert, loading, error, refetch } = useExpertProfile(username);
 
   // Loading state
