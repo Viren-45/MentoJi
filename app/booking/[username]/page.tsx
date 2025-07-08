@@ -3,10 +3,11 @@ import { notFound } from 'next/navigation';
 import supabase from '@/lib/supabase/supabase-client';
 import BookingLayout from '@/components/booking/booking-layout';
 
+// Updated interface for Next.js 15 - params is now a Promise
 interface BookingPageProps {
-  params: {
+  params: Promise<{
     username: string;
-  };
+  }>;
 }
 
 // Get expert data by username
@@ -35,7 +36,10 @@ async function getExpertByUsername(username: string) {
 }
 
 export default async function BookingPage({ params }: BookingPageProps) {
-  const expert = await getExpertByUsername(params.username);
+  // Await the params Promise in Next.js 15
+  const { username } = await params;
+  
+  const expert = await getExpertByUsername(username);
 
   if (!expert) {
     notFound();
