@@ -142,7 +142,7 @@ const Navbar = () => {
                           {user?.email}
                         </p>
                       </div>
-                      
+
                       {/* Dashboard link for mobile */}
                       <DropdownMenuItem asChild className="md:hidden">
                         <Link href={getDashboardLink()} className="flex items-center space-x-2">
@@ -150,23 +150,23 @@ const Navbar = () => {
                           <span>Dashboard</span>
                         </Link>
                       </DropdownMenuItem>
-                      
+
                       <DropdownMenuItem asChild>
                         <Link href="/profile" className="flex items-center space-x-2">
                           <User className="w-4 h-4" />
                           <span>My Profile</span>
                         </Link>
                       </DropdownMenuItem>
-                      
+
                       <DropdownMenuItem asChild>
                         <Link href="/settings" className="flex items-center space-x-2">
                           <Settings className="w-4 h-4" />
                           <span>Settings</span>
                         </Link>
                       </DropdownMenuItem>
-                      
+
                       <DropdownMenuSeparator />
-                      
+
                       <DropdownMenuItem
                         onClick={handleSignOut}
                         className="flex items-center space-x-2 text-red-600 focus:text-red-600"
@@ -190,7 +190,7 @@ const Navbar = () => {
                   {/* Log in Button */}
                   <Button
                     asChild
-                    className="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-4 md:px-6 text-sm md:text-base"
+                    className="rounded-full"
                   >
                     <Link href="/auth/sign-in">Log in</Link>
                   </Button>

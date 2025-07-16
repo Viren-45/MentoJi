@@ -6,17 +6,12 @@ import { Zap, Users, MessageSquare, ArrowRight } from "lucide-react";
 
 const ForClientsSection: React.FC = () => {
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8">
+    <section className="py-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Modern container with subtle gradient */}
         <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
           {/* Background Image with improved overlay */}
-          <div
-            className="relative h-[500px] sm:h-[600px] lg:h-[700px] bg-cover bg-center bg-no-repeat"
-            style={{
-              backgroundImage: "url('/Images/client-section-bg.png')",
-            }}
-          >
+          <div className="relative py-10 sm:py-24 bg-[url('/Images/client-section-bg.png')] bg-cover bg-no-repeat bg-[75%_center]">
             {/* Sophisticated overlay with gradient */}
             <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30"></div>
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>

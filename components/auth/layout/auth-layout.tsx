@@ -18,11 +18,6 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
       <div className="w-full lg:w-[70%] flex items-center justify-center bg-white flex-shrink-0">
         <div className="w-full max-w-md px-8 py-12">{children}</div>
       </div>
-
-      {/* Mobile Poster Background */}
-      <div className="lg:hidden absolute inset-0 opacity-5">
-        <AuthPoster />
-      </div>
     </div>
   );
 };

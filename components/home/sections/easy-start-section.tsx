@@ -2,15 +2,16 @@
 
 import React from "react";
 import { Search, Zap, MessageCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const EasyStartSection: React.FC = () => {
   return (
-    <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 via-white to-transparent">
       <div className="max-w-7xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-8 items-center">
           {/* Left side - Illustration placeholder */}
           <div>
-            <div className="bg-blue-50 rounded-2xl h-96 sm:h-96 lg:h-[450px] flex items-center justify-center">
+            <div className="border bg-blue-50 rounded-2xl h-96 sm:h-96 lg:h-[450px] flex items-center justify-center">
               {/* Placeholder for illustration - you can add your image here later */}
               <div className="text-blue-300 text-sm font-medium">
                 Illustration placeholder
@@ -78,12 +79,12 @@ const EasyStartSection: React.FC = () => {
 
             {/* Call to action buttons */}
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold text-base transition-colors shadow-lg cursor-pointer">
+              <Button size="lg">
                 Sign up free
-              </button>
-              <button className="border-2 border-blue-600 text-blue-600 hover:bg-blue-50 px-8 py-3 rounded-lg font-semibold text-base transition-colors cursor-pointer">
+              </Button>
+              <Button variant="outline" size="lg" className="border-blue-600 border-2 text-blue-600 hover:text-blue-600 hover:bg-blue-50">
                 How it works
-              </button>
+              </Button>
             </div>
           </div>
         </div>

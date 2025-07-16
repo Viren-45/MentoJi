@@ -63,7 +63,7 @@ const ExpertOpportunitiesSection: React.FC = () => {
         <div className="text-center mb-16">
           <div className="inline-flex items-center px-6 py-3 bg-white/60 backdrop-blur-lg rounded-full border border-white/40 shadow-lg mb-8 hover:bg-white/70 transition-all duration-300">
             <Sparkles className="w-4 h-4 text-blue-600 mr-2 animate-pulse" />
-            <span className="text-blue-700 font-semibold bg-gradient-to-r from-blue-900 via-blue-500 to-blue-800 bg-clip-text text-transparent">
+            <span className="font-semibold bg-gradient-to-r from-blue-900 via-blue-500 to-blue-800 bg-clip-text text-transparent">
               Expert Opportunities
             </span>
           </div>
@@ -92,7 +92,7 @@ const ExpertOpportunitiesSection: React.FC = () => {
                 className="group bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
               >
                 <div
-                  className={`w-14 h-14 bg-gradient-to-br ${opportunity.color} rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}
+                  className={`w-14 h-14 bg-gradient-to-br ${opportunity.color} shadow-[0px_-2px_0px_0px_rgba(0,0,0,0.3)_inset] rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}
                 >
                   <IconComponent className="w-7 h-7 text-white" />
                 </div>

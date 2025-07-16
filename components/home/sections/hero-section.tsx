@@ -3,12 +3,13 @@
 
 import React, { useState } from "react";
 import { Search } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const HeroSection: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"find" | "offer">("find");
 
   return (
-    <section className="py-26 px-4 sm:px-6 lg:px-8">
+    <section className="py-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Modern container with enhanced styling */}
         <div className="relative rounded-3xl overflow-hidden shadow-2xl">
@@ -36,26 +37,29 @@ const HeroSection: React.FC = () => {
                 </h1>
 
                 {/* Compact Tabbed Interface */}
-                <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-2xl max-w-xl border border-white/20">
+                <div className="bg-black/30 backdrop-blur-md rounded-2xl p-6 shadow-2xl max-w-xl border border-white/20">
                   {/* Compact Tab Headers */}
                   <div className="flex gap-1 mb-6 bg-black/20 p-1 rounded-full backdrop-blur-sm">
                     <button
                       onClick={() => setActiveTab("find")}
-                      className={`flex-1 py-2.5 px-5 rounded-full text-sm font-medium transition-all duration-300 ${
+                      className={cn(
+                        "flex-1 py-2.5 px-5 rounded-full text-sm font-medium transition-all duration-300",
                         activeTab === "find"
-                          ? "bg-blue-500 text-white shadow-md"
+                          ? "bg-blue-500 text-white shadow-[0px_-2px_0px_0px_rgba(0,0,0,0.3)_inset]"
                           : "text-white/90 hover:text-white hover:bg-white/10"
-                      }`}
+                      )}
                     >
                       Find Experts
                     </button>
+
                     <button
                       onClick={() => setActiveTab("offer")}
-                      className={`flex-1 py-2.5 px-5 rounded-full text-sm font-medium transition-all duration-300 ${
+                      className={cn(
+                        "flex-1 py-2.5 px-5 rounded-full text-sm font-medium transition-all duration-300",
                         activeTab === "offer"
-                          ? "bg-blue-500 text-white shadow-md"
+                          ? "bg-blue-500 text-white shadow-[0px_-2px_0px_0px_rgba(0,0,0,0.3)_inset]"
                           : "text-white/90 hover:text-white hover:bg-white/10"
-                      }`}
+                      )}
                     >
                       Offer Expertise
                     </button>
@@ -71,7 +75,7 @@ const HeroSection: React.FC = () => {
                           placeholder="Search by role, skills, or keywords"
                           className="w-full px-5 py-3.5 pr-16 text-gray-900 placeholder-gray-500 bg-white rounded-xl border-0 focus:ring-2 focus:ring-blue-400 focus:outline-none shadow-lg text-sm font-medium transition-all duration-300"
                         />
-                        <button className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2.5 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-1.5 text-sm font-medium">
+                        <button className="absolute right-1 top-1/2 transform -translate-y-1/2 shadow-[0px_-2px_0px_0px_rgba(0,0,0,0.3)_inset] bg-blue-500 hover:bg-blue-600 text-white px-4 py-2.5 rounded-lg transition-all duration-300 flex items-center gap-1.5 text-sm font-medium">
                           <Search className="w-4 h-4" />
                           Search
                         </button>

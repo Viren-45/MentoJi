@@ -3,6 +3,12 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp, HelpCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 interface FAQItem {
   id: string;
@@ -17,7 +23,7 @@ const faqData: FAQItem[] = [
     answer: "Once you book a session, you'll receive a brief questionnaire to help the expert understand your challenge. The expert comes prepared, and you'll have a focused 15-30 minute video call where they provide tailored advice. After the session, you'll receive an AI-generated PDF summary with key insights and action items."
   },
   {
-    id: "2", 
+    id: "2",
     question: "How are experts vetted and verified?",
     answer: "All experts go through a rigorous verification process. We check their credentials, work experience, and professional background. Only qualified professionals with proven expertise in their field are approved to join our platform. Each expert also maintains a rating based on client feedback."
   },
@@ -47,8 +53,8 @@ const FAQSection = () => {
   const [openItems, setOpenItems] = useState<string[]>([]);
 
   const toggleItem = (id: string) => {
-    setOpenItems(prev => 
-      prev.includes(id) 
+    setOpenItems(prev =>
+      prev.includes(id)
         ? prev.filter(item => item !== id)
         : [...prev, id]
     );
@@ -67,7 +73,7 @@ const FAQSection = () => {
               Got Questions?
             </span>
           </div>
-          
+
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             Frequently Asked Questions
           </h2>
@@ -77,51 +83,29 @@ const FAQSection = () => {
         </div>
 
         {/* FAQ Items */}
-        <div className="space-y-4">
+        {/* FAQ Items */}
+        <Accordion type="multiple" className="space-y-4">
           {faqData.map((faq) => (
-            <Card 
-              key={faq.id} 
-              className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200"
+            <AccordionItem
+              key={faq.id}
+              value={faq.id}
+              className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 rounded-lg"
             >
-              <CardContent className="p-0">
-                <button
-                  onClick={() => toggleItem(faq.id)}
-                  className="w-full text-left p-6 focus:outline-none cursor-pointer"
-                >
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold text-gray-900 pr-4">
-                      {faq.question}
-                    </h3>
-                    <div className="flex-shrink-0">
-                      {isOpen(faq.id) ? (
-                        <ChevronUp className="w-5 h-5 text-gray-500 transition-transform duration-200" />
-                      ) : (
-                        <ChevronDown className="w-5 h-5 text-gray-500 transition-transform duration-200" />
-                      )}
-                    </div>
+              <AccordionTrigger className="px-6 py-4 text-left text-lg font-semibold text-gray-900">
+                {faq.question}
+              </AccordionTrigger>
+              <AccordionContent>
+                <CardContent className="px-6 pb-6 pt-2">
+                  <div className="border-t border-gray-200 pt-4">
+                    <p className="text-base text-gray-700 leading-relaxed">
+                      {faq.answer}
+                    </p>
                   </div>
-                </button>
-                
-                {/* Collapsible Content */}
-                <div 
-                  className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                    isOpen(faq.id) 
-                      ? 'max-h-96 opacity-100' 
-                      : 'max-h-0 opacity-0'
-                  }`}
-                >
-                  <div className="px-6 pb-6">
-                    <div className="border-t border-gray-100 pt-4">
-                      <p className="text-gray-700 leading-relaxed">
-                        {faq.answer}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </AccordionContent>
+            </AccordionItem>
           ))}
-        </div>
+        </Accordion>
 
         {/* Additional Help */}
         <div className="mt-12 text-center">

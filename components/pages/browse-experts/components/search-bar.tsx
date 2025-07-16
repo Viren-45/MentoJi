@@ -11,8 +11,8 @@ interface SearchBarProps {
   defaultValue?: string;
 }
 
-const SearchBar = ({ 
-  onSearch, 
+const SearchBar = ({
+  onSearch,
   placeholder = "Search experts by skill, industry, or challenge...",
   defaultValue = ""
 }: SearchBarProps) => {
@@ -35,7 +35,7 @@ const SearchBar = ({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchQuery(value);
-    
+
     // Optional: Trigger search on every keystroke (debounced in real implementation)
     // if (onSearch) {
     //   onSearch(value.trim());
@@ -44,35 +44,38 @@ const SearchBar = ({
 
   return (
     <div className="w-full max-w-2xl mx-auto">
-      <form onSubmit={handleSubmit} className="relative">
-        <div className="relative">
+      <form onSubmit={handleSubmit}>
+        <div className="relative pl-2 bg-background flex items-center border-2 border-gray-200 rounded-lg shadow-sm focus-within:ring-2 focus-within:ring-blue-500 transition">
+
           {/* Search Icon */}
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-          
-          {/* Search Input */}
+          <Search className="w-5 h-5 text-gray-400" />
+
+          {/* Input */}
           <Input
             type="text"
             value={searchQuery}
             onChange={handleInputChange}
             placeholder={placeholder}
-            className="w-full pl-12 pr-24 py-3 text-base border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 shadow-sm transition-colors duration-200"
+            className="bg-transparent flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 px-3 py-3 text-base"
           />
-          
+
           {/* Clear Button */}
           {searchQuery && (
             <button
               type="button"
               onClick={handleClear}
-              className="absolute right-16 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1"
+              className="text-gray-400 hover:text-gray-600 transition-colors p-2"
+              aria-label="Clear search"
             >
               <X className="w-4 h-4" />
             </button>
           )}
-          
+
           {/* Search Button */}
           <Button
             type="submit"
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-md font-medium text-sm transition-colors duration-200"
+            size="sm"
+            className="rounded-r-md px-4 bg-blue-600 hover:bg-blue-700 text-white"
           >
             Search
           </Button>

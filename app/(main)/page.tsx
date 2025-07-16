@@ -4,12 +4,10 @@ import ForClientsSection from "@/components/home/sections//for-clients-section";
 import ExpertsByCategorySection from "@/components/home/sections/experts-by-category-section";
 import ForExpertsSection from "@/components/home/sections/for-experts-section";
 import ExpertOpportunitiesSection from "@/components/home/sections/expert-opportunities-section";
-import Navbar from "@/components/home/navigation/navbar";
 
 export default function Home() {
   return (
-    <div>
-      <Navbar />
+    <div className="space-y-10">
       <HeroSection />
       <EasyStartSection />
       <ForClientsSection />

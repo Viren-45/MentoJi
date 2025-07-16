@@ -101,7 +101,7 @@ const ExpertsByCategorySection: React.FC = () => {
                 <div className="relative z-10">
                   {/* Icon */}
                   <div
-                    className={`w-14 h-14 bg-gradient-to-br ${category.gradient} rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg`}
+                    className={`w-14 h-14 bg-gradient-to-br ${category.gradient} shadow-[0px_-2px_0px_0px_rgba(0,0,0,0.3)_inset] rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}
                   >
                     <IconComponent className="w-7 h-7 text-white" />
                   </div>
